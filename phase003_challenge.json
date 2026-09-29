@@ -1,0 +1,93 @@
+{
+    "phase": "003",
+    "title": "REVERSE ENTROPY GATE",
+    "grid_dimensions": [
+        8,
+        8
+    ],
+    "generations_forward": 50,
+    "target_state_S50": [
+        [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+        ],
+        [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+        ],
+        [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+        ],
+        [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+        ],
+        [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+        ],
+        [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+        ],
+        [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+        ],
+        [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+        ]
+    ],
+    "verification_sha256": "7aa07dc8829ddedf07f8ecbb13a301708948c725277c69ef46e3d4cb637e7bb7",
+    "instruction": "Determine the unique initial state S_0. Submit S_0 as a flat 64-character binary string."
+}
