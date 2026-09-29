@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>APHELION // PHASE 001</title>
+    <style>
+        :root {
+            --bg-color: #050805;
+            --text-color: #00ff66;
+            --dim-color: #008833;
+            --highlight: #33ff88;
+            --alert-color: #ff3333;
+            --font-stack: 'Courier New', Courier, monospace;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-family: var(--font-stack);
+            font-size: 14px;
+            line-height: 1.4;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            padding: 15px;
+            position: relative;
+        }
+
+        /* CRT Scanline and Flicker Effect */
+        body::before {
+            content: " ";
+            display: block;
+            position: absolute;
+            top: 0; left: 0; bottom: 0; right: 0;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+            z-index: 10;
+            background-size: 100% 3px, 6px 100%;
+            pointer-events: none;
+        }
+
+        .header {
+            border-bottom: 1px solid var(--dim-color);
+            padding-bottom: 8px;
+            margin-bottom: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .title {
+            font-weight: bold;
+            letter-spacing: 2px;
+            font-size: 16px;
+            text-shadow: 0 0 5px var(--text-color);
+        }
+
+        .status-badge {
+            font-size: 11px;
+            background: #002200;
+            border: 1px solid var(--dim-color);
+            padding: 2px 6px;
+            border-radius: 3px;
+        }
+
+        #terminal-output {
+            flex: 1;
+            overflow-y: auto;
+            word-wrap: break-word;
+            white-space: pre-wrap;
+            margin-bottom: 12px;
+            padding-right: 5px;
+        }
+
+        .line {
+            margin-bottom: 4px;
+        }
+
+        .system-line {
+            color: var(--dim-color);
+        }
+
+        .highlight-line {
+            color: var(--highlight);
+            text-shadow: 0 0 3px var(--text-color);
+        }
+
+        .alert-line {
+            color: var(--alert-color);
+        }
+
+        .input-line {
+            display: flex;
+            align-items: center;
+            border-top: 1px solid #003311;
+            padding-top: 8px;
+            background: var(--bg-color);
+            z-index: 20;
+        }
+
+        .prompt {
+            color: var(--highlight);
+            margin-right: 8px;
+            font-weight: bold;
+        }
+
+        #cmd-input {
+            background: transparent;
+            border: none;
+            color: var(--text-color);
+            font-family: var(--font-stack);
+            font-size: 14px;
+            flex: 1;
+            outline: none;
+        }
+
+        .audio-btn {
+            background: transparent;
+            border: 1px solid var(--dim-color);
+            color: var(--text-color);
+            font-family: var(--font-stack);
+            font-size: 10px;
+            padding: 3px 8px;
+            cursor: pointer;
+        }
+
+        .audio-btn:hover {
+            background: var(--dim-color);
+            color: #000;
+        }
+
+        ::-webkit-scrollbar {
+            width: 4px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: var(--dim-color);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <div class="title">APHELION // SYS_01</div>
+        <button class="audio-btn" id="audio-toggle" onclick="toggleAudio()">AUDIO: OFF</button>
+    </div>
+
+    <div id="terminal-output"></div>
+
+    <div class="input-line">
+        <span class="prompt">&gt;</span>
+        <input type="text" id="cmd-input" placeholder="Type 'help' to initialize..." autofocus autocomplete="off" spellcheck="false">
+    </div>
+
+    <script>
+        const output = document.getElementById('terminal-output');
+        const input = document.getElementById('cmd-input');
+        let audioCtx = null;
+        let oscillator = null;
+        let audioActive = false;
+
+        // Hidden Developer Console Easter Egg
+        console.log("%c[APHELION PROTOCOL INITIATED]", "color: #00ff66; font-size: 16px; font-weight: bold;");
+        console.log("%cDo not trust the surface text. The entropy vector lives in Shannon's frequency.", "color: #008833;");
+        console.log("PAYLOAD_PARTIAL: 0x35 0x30 0x20 0x33 0x32 0x20 0x31 0x36");
+
+        const bootSequence = [
+            { text: "APHELION CORE OS v1.0.4", class: "highlight-line" },
+            { text: "PGP Key ID: 4096R/APHELION [VERIFIED]", class: "system-line" },
+            { text: "--------------------------------------------------", class: "system-line" },
+            { text: "The static speaks in prime numbers. Do not trust the light.", class: "line" },
+            { text: "Type 'help' for available protocol commands.\n", class: "system-line" }
+        ];
+
+        function printLine(text, className = "line") {
+            const div = document.createElement('div');
+            div.className = `line ${className}`;
+            div.textContent = text;
+            output.appendChild(div);
+            output.scrollTop = output.scrollHeight;
+        }
+
+        function initBoot() {
+            bootSequence.forEach((item, index) => {
+                setTimeout(() => {
+                    printLine(item.text, item.class);
+                }, index * 200);
+            });
+        }
+
+        function toggleAudio() {
+            const btn = document.getElementById('audio-toggle');
+            if (!audioActive) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                oscillator = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                
+                oscillator.type = 'sawtooth';
+                oscillator.frequency.setValueAtTime(55, audioCtx.currentTime); // Low A hum
+                gain.gain.setValueAtTime(0.015, audioCtx.currentTime);
+                
+                oscillator.connect(gain);
+                gain.connect(audioCtx.destination);
+                oscillator.start();
+                
+                audioActive = true;
+                btn.textContent = "AUDIO: ON";
+                btn.style.borderColor = "#00ff66";
+            } else {
+                if (oscillator) oscillator.stop();
+                audioActive = false;
+                btn.textContent = "AUDIO: OFF";
+                btn.style.borderColor = "#008833";
+            }
+        }
+
+        function playBeep() {
+            if (!audioActive || !audioCtx) return;
+            const beep = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            beep.frequency.setValueAtTime(880, audioCtx.currentTime);
+            gain.gain.setValueAtTime(0.03, audioCtx.currentTime);
+            beep.connect(gain);
+            gain.connect(audioCtx.destination);
+            beep.start();
+            beep.stop(audioCtx.currentTime + 0.05);
+        }
+
+        input.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                const cmd = input.value.trim().toLowerCase();
+                printLine(`> ${input.value}`, "highlight-line");
+                playBeep();
+                input.value = '';
+
+                processCommand(cmd);
+            }
+        });
+
+        function processCommand(cmd) {
+            const args = cmd.split(' ');
+            const primary = args[0];
+
+            switch(primary) {
+                case 'help':
+                    printLine("AVAILABLE COMMANDS:", "highlight-line");
+                    printLine("  status   - View active node telemetry");
+                    printLine("  cipher   - Retrieve Phase 001 encrypted payload");
+                    printLine("  logs     - Read broadcast history");
+                    printLine("  clear    - Clear display buffer");
+                    break;
+
+                case 'status':
+                    printLine("[SYSTEM STATUS]", "highlight-line");
+                    printLine("Node Integrity: 100%");
+                    printLine("Phase: 001 / 004 Active");
+                    printLine("PGP Signature: Valid");
+                    printLine("Active Solvers: Searching...");
+                    break;
+
+                case 'cipher':
+                    printLine("-----BEGIN PGP SIGNED MESSAGE-----", "system-line");
+                    printLine("Hash: SHA512\n");
+                    printLine("0x35 0x30 0x20 0x33 0x32 0x20 0x31 0x36 0x20 0x08 0x19 0x04 0x21 0x14 0x07 0x10");
+                    printLine("BOOK CITE: Claude Shannon (1948) 'A Mathematical Theory of Communication'");
+                    printLine("COORDINATES: [3:1:4] [12:2:1] [19:4:2]");
+                    printLine("PRIME PRODUCT GATE: 1033 * 3301 * 7919\n");
+                    printLine("-----BEGIN PGP SIGNATURE-----", "system-line");
+                    printLine("iQIzBAEBCgAdFiEE7x9Y2K... [APHELION MASTER KEY]");
+                    printLine("-----END PGP SIGNATURE-----", "system-line");
+                    break;
+
+                case 'logs':
+                    printLine("LOG 0000: Transmission initialized at UTC 00:00.");
+                    printLine("LOG 0001: Silence is not absence of sound. It is maximum entropy.");
+                    printLine("LOG 0002: Verify every key. Reject imitation.");
+                    break;
+
+                case 'clear':
+                    output.innerHTML = '';
+                    break;
+
+                case '':
+                    break;
+
+                default:
+                    printLine(`Command not recognized: '${cmd}'. Type 'help' for instructions.`, "alert-line");
+            }
+        }
+
+        window.onload = initBoot;
+    </script>
+</body>
+</html>
